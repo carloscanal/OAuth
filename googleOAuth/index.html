@@ -40,7 +40,7 @@
         console.log("  Email: " + responsePayload.email);
     
         console.log("Check the token in https://www.jwt.io");
-        console.log("                or https://www.googleapis.com/drive/v3/about?fields=user&access_token<ID_TOKEN>");
+        console.log("                or https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=<ID_TOKEN>");
 
         console.log('for instance:');
         console.log('https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + response.credential);      
