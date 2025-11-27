@@ -1,47 +1,61 @@
 <!DOCTYPE html>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
-<html>
-    <head>
-        <title>Google OAuth login</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        
-        <!-- INSERT YOUR <CLIENT_ID> IN THE LINE BELOW -->
-        
-        <!-- Es necesario limpiar la cache del navegador si editamos el OAuth Client para fijar origenes -->
-        
-        <meta name="google-signin-client_id" content="*** INSERT HERE YOUR CLIENT_ID, e.g. 895(...)ngp.apps.googleusercontent.com ***">
 
-        <script>
-            function onSignIn(googleUser) {
-                var profile = googleUser.getBasicProfile();
-                console.log('ID: ' + profile.getId() + '. Do not send to your backend! Use an ID token instead.'); 
-                console.log('Name: ' + profile.getName());
-                console.log('Image URL: ' + profile.getImageUrl());
-                console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
-                var id_token = googleUser.getAuthResponse().id_token;
-                console.log('ID token: ' + id_token);
-                
-                console.log('You can check the ID token with:');
-                console.log('https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=<ID token>');
-                console.log('for instance:');
-                console.log('https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + id_token);                
-                }
-            function signOut() {
-                var auth2 = gapi.auth2.getAuthInstance();
-                auth2.signOut().then(function () {
-                    console.log('User signed out.');
-                    });
-                }
-        </script>
-        <script src="https://apis.google.com/js/platform.js" async defer></script>
-    </head>
-    <body>
-        <div class="g-signin2" data-onsuccess="onSignIn"></div>
-        <a href="#" onclick="signOut();">Sign out</a>
-    </body>
+
+<!-- Documentación:                                                                          -->
+<!-- https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid?hl=es-419 -->
+<!-- https://developers.google.com/identity/gsi/web/guides/display-button?hl=es-419          -->
+
+<html lang="en">
+  <head>
+    <script src="https://accounts.google.com/gsi/client" async></script>
+
+    <script>
+      function decodeJWT(token) {
+
+        let base64Url = token.split(".")[1];
+        let base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        let jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map(function (c) {
+              return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join("")
+        );
+        return JSON.parse(jsonPayload);
+        }
+
+      function handleCredentialResponse(response) {
+
+        console.log("Encoded JWT ID token: " + response.credential);
+
+        const responsePayload = decodeJWT(response.credential);
+
+        console.log("Decoded JWT ID token fields:");
+        console.log("  Full Name: " + responsePayload.name);
+        console.log("  Given Name: " + responsePayload.given_name);
+        console.log("  Family Name: " + responsePayload.family_name);
+        console.log("  Unique ID: " + responsePayload.sub);
+        console.log("  Profile image URL: " + responsePayload.picture);
+        console.log("  Email: " + responsePayload.email);
+    
+        console.log("Check the token in https://www.jwt.io");
+        console.log("                or https://www.googleapis.com/drive/v3/about?fields=user&access_token<ID_TOKEN>");
+
+        console.log('for instance:');
+        console.log('https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + response.credential);      
+        }
+    </script>
+  </head>
+  <body>
+    <!-- g_id_onload contains Google Identity Services settings -->
+    <div
+      id="g_id_onload"
+      data-auto_prompt="false"
+      data-callback="handleCredentialResponse"
+      data-client_id="423516861949-p3fere0btsiq18p1r425pk8rf2oupng9.apps.googleusercontent.com"
+    ></div>
+    <!-- g_id_signin places the button on a page and supports customization -->
+    <div class="g_id_signin"></div>
+  </body>
 </html>
